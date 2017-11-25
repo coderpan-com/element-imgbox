@@ -3,6 +3,7 @@
 > Image browse and upload plugin base on Vue & element-ui  
 > 基于Vue与element-ui的图片选取和上传插件
 
+[Demo](https://erzh.github.io/elx-imgbox/)
 
 ## require
  - Vue 2.5+
@@ -30,3 +31,4 @@
 - 选择文件后，需要点击“确定上传”开始上传图片；
 - 上传图片只要有一张成功则回调并关闭上传窗口
 - 有错误发生ELEMENT.Message.error()提示
+
