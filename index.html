@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>elx-imgbox</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.0.5/theme-chalk/index.css">
+    <style>
+      #app {
+        text-align: center;
+        margin-top: 50px;
+      }
+      #app .img-list {
+        margin:20px auto;
+        width: 800px;
+      }
+      #app .img-list img {
+        float: left;
+        width: 90px;
+        height:90px;
+        margin:8px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="app">
+      <el-button type="primary" @click="single">单选</el-button>
+      <el-button type="primary" @click="multiple">多选</el-button>
+      <el-button type="primary" @click="pickOnly">只选取</el-button>
+      <el-button type="primary" @click="uploadOnly">只上传</el-button>
+
+      <div class="img-list">
+        <img :src="img.thumb" alt="" v-for="img in img_list" :url="img.url" :path="img.path">
+      </div>
+    </div>
+
+    <script src="https://cdn.bootcss.com/vue/2.5.8/vue.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.0.5/index.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="./dist/imgbox.js"></script>
+
+    <script>
+      var app = new Vue({
+        el: '#app',
+        data:function(){
+          return {
+            img_list: [],
+            opts: {
+              imgUploadUrl: './test/upload.json',
+              imgListUrl: './test/list.json',
+              multiple: true,
+              enablePick: true,
+              enableUpload: true,
+              callback: function(img){
+                app.img_list.push(img);
+              }
+            }
+          }
+        },
+        methods: {
+          multiple: function () {
+            Vue.elxImgbox(this.opts);
+          },
+          single: function () {
+            var options = JSON.parse(JSON.stringify(this.opts));
+            options.multiple = false;
+            Vue.elxImgbox(options);
+          },
+          pickOnly: function () {
+            var options = JSON.parse(JSON.stringify(this.opts));
+            options.enableUpload = false;
+            Vue.elxImgbox(options);
+          },
+          uploadOnly: function () {
+            var options = JSON.parse(JSON.stringify(this.opts));
+            options.enablePick = false;
+            Vue.elxImgbox(options);
+          }
+        }
+      });
+
+      app.multiple();
+    </script>
+  </body>
+</html>
