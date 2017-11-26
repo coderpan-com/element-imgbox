@@ -17,7 +17,20 @@ const ElxImgboxPlugin = {
         document.querySelector('body').appendChild(vm.$el);
       }
 
-      imgbox.reset();
+      if(!imgbox.options.enablePick) {
+        imgbox.activeTab = 'upload';
+      } else if(!imgbox.options.enableUpload) {
+        imgbox.activeTab = 'pick';
+      } else if(imgbox.activeTab === 'upload' && imgbox.options.enablePick) {
+        // 默认进入选取图片
+        imgbox.activeTab = 'pick';
+      }
+
+      // 切换为单选时（实际应用一般不会发生），清空所有选项
+      if(!imgbox.options.multiple) {
+        imgbox.handleCancelAll();
+      }
+
       imgbox.visible = true;
 
       return imgbox;

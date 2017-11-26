@@ -71,14 +71,14 @@
     data() {
       return {
         options: {
-          uploadUrl: '',
-          listUrl: '',
-          multiple: true,
-          limit: 10, // 一批次最多可上传图片数
-          callback: null, // 选择后回调函数
-          enablePick: true, // 是否启用图片选取
+          uploadUrl: '',      // 图片上传URL
+          listUrl: '',        // 图片列表数据URL
+          multiple: true,     // 是否支持选取多个图片// 是否支持选取多个图片
+          limit: 10,          // 一批次最多可上传图片数
+          callback: null,     // 选择后回调函数
+          enablePick: true,   // 是否启用图片选取
           enableUpload: true, // 是否启用图片上传
-          maxSize: 2 // 最大尺寸（M）
+          maxSize: 2          // 最大尺寸（M）
         },
 
         isLoading: true,
@@ -255,7 +255,7 @@
 
         // 隐藏，取消已选
         this.visible = false;
-        this.handleCancelAll();
+        this.reset();
       },
 
       /**
@@ -354,9 +354,8 @@
         this.uploadSuccessCount ++;
 
         if(fileList.length === this.uploadSuccessCount) {
-          this.uploadSuccessCount = 0;
-          this.$refs.upload.clearFiles();
           this.visible = false;
+          this.reset();
         }
       },
 
@@ -371,15 +370,6 @@
        * 重置参数
        */
       reset () {
-        if(!this.options.enablePick) {
-          this.activeTab = 'upload';
-        } else if(!this.options.enableUpload) {
-          this.activeTab = 'pick';
-        } else if(this.activeTab === 'upload' && this.options.enablePick) {
-          // 默认进入选取图片
-          this.activeTab = 'pick';
-        }
-
         if(typeof this.$refs.upload !== 'undefined') {
           this.$refs.upload.clearFiles();
         }
