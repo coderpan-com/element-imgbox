@@ -9,8 +9,9 @@
 
         <div class="elx-main img-list">
           <div class="img-item" v-for="(img, imgKey) in imgRes.list" @click="handleSelectImage(img)">
-            <div><img :src="img.thumb" alt="img.name"></div>
+            <div class="thumb-wp"><img :src="img.thumb" alt="img.name"></div>
             <div class="title">{{img.name}}</div>
+            <div class="label" v-if="img.label">{{img.label}}</div>
             <span class="selected" v-if="img.selected"><span class="icon el-icon-check"></span></span>
           </div>
         </div>
@@ -34,7 +35,7 @@
             class="upload-img-preview"
             list-type="picture-card"
             accept="image/*"
-            :action="options.imgUploadUrl"
+            :action="options.uploadUrl"
             :auto-upload="false"
             :multiple="options.multiple"
             :limit="options.limit"
@@ -69,35 +70,36 @@
 
     data() {
       return {
+        options: {
+          uploadUrl: '',
+          listUrl: '',
+          multiple: true,
+          limit: 10, // 一批次最多可上传图片数
+          callback: null, // 选择后回调函数
+          enablePick: true, // 是否启用图片选取
+          enableUpload: true, // 是否启用图片上传
+          maxSize: 2 // 最大尺寸（M）
+        },
+
         isLoading: true,
         visible: true,
         activeTab: 'pick',
         selectedImgs: {},
         selectedImgCount: 0,
         uploadSuccessCount: 0,
-        fixUploadInterval: null,
+        fixThumbInterval: null,
         imgRes: {
           list: [],
           total: 0,
-        },
-
-        options: {
-          imgUploadUrl: '',
-          imgListUrl: '',
-          multiple: true,
-          limit: 10, // 一批次最多可上传图片数
-          callback: null, // 选择后回调函数
-          itemUniqueKey: 'path',
-          enablePick: true,
-          enableUpload: true,
-          maxSize: 2 // 最大尺寸（M）
         }
       };
     },
 
     methods: {
 
-      // 多选时同步已选图片数量
+      /**
+       * 多选时同步已选图片数量
+       */
       syncSelectedImgCount() {
         let selectedCount = 0;
         $.each(this.selectedImgs, function (key, val) {
@@ -106,16 +108,19 @@
         this.selectedImgCount = selectedCount;
       },
 
+      /**
+       * 点击图片时选中或取消选中图片
+       * @param img object
+       */
       handleSelectImage(img){
-        const itemUniqueKey = this.options.itemUniqueKey;
-        if(typeof this.selectedImgs[img[itemUniqueKey]] == 'object') {
+        if(typeof this.selectedImgs[img.thumb] === 'object') {
           // 取消选择图片
           img.selected = false;
 
           let selectedImgs = {};
           if(this.options.multiple) {
             $.each(this.selectedImgs, function (key, val) {
-              if (key == img[itemUniqueKey]) {
+              if (key === img.thumb) {
                 return;
               }
               selectedImgs[key] = val;
@@ -139,16 +144,20 @@
           }
 
           img.selected = true;
-          this.selectedImgs[img[itemUniqueKey]] = JSON.parse(JSON.stringify(img));
+          this.selectedImgs[img.thumb] = JSON.parse(JSON.stringify(img));
         }
 
         this.syncSelectedImgCount();
       },
 
-      loadImg(page = 1){
-        const imgListUrl = this.options.imgListUrl;
+      /**
+       * 加载图片列表数据
+       * @param page
+       */
+      loadImgList(page = 1){
+        const listUrl = this.options.listUrl;
 
-        if(!imgListUrl) {
+        if(!listUrl) {
           return;
         }
 
@@ -156,24 +165,47 @@
         this.isLoading = true;
 
         $(function () {
-          $.getJSON(imgListUrl, {page: page, rows: 15, _r: Math.random()}, function (res) {
+          /**
+           * res = {
+           *     list: [{name: img_name, thumb: img_thumb_url ...}, ...],
+           *     total: number
+           * }
+           */
+          $.getJSON(listUrl, {page: page, rows: 15, _r: Math.random()}, function (res) {
             let imgs = [];
             data.imgRes.total = parseInt(res.total);
 
             let listCount = 0;
             for(const i in res.list) {
               listCount ++;
+
+              // 每页只显示15条
               if(listCount > 15) {
                 break;
               }
 
               let img = res.list[i];
-              if(typeof img[data.options.itemUniqueKey] !== 'string') {
-                let err = "图片数据必须包含'" + data.options.itemUniqueKey + "'属性！";
+
+              // 图片缩略图
+              if(typeof img.thumb !== 'string') {
+                let err = "图片数据必须包含'thumb'属性！";
                 alert(err);
                 throw err;
               }
-              img.selected = (typeof data.selectedImgs[img[data.options.itemUniqueKey]] === 'object');
+
+              // 图片名
+              if(typeof img.name !== 'string') {
+                img.name = img.thumb.substr(img.thumb.lastIndexOf('/') + 1);
+              }
+
+              // 图片其他信息
+              if(typeof img.label !== 'string') {
+                img.label = '';
+              }
+
+              // 图片选中状态
+              img.selected = (typeof data.selectedImgs[img.thumb] === 'object');
+
               imgs.push(img);
             }
 
@@ -183,11 +215,17 @@
         });
       },
 
+      /**
+       * 分页页面变化时刷新数据
+       * @param page
+       */
       handlePageChange (page) {
-        this.loadImg(page);
+        this.loadImgList(page);
       },
 
-      // 取消已选
+      /**
+       *  取消已选
+       */
       handleCancelAll () {
         this.selectedImgCount = 0;
         this.selectedImgs = {};
@@ -196,7 +234,10 @@
         }
       },
 
-      // 确认选择从列表选择的图片
+      /**
+       * 确认选择从列表选择的图片
+       * @returns {boolean}
+       */
       handleConfirmSelect () {
         if(typeof this.options.callback !== 'function') {
           ELEMENT.Message.error('请先设置回调函数');
@@ -217,7 +258,9 @@
         this.handleCancelAll();
       },
 
-      // 确定上传图片
+      /**
+       * 提交上传图片
+       */
       handleConfirmUpload () {
         this.$refs.upload.submit();
       },
@@ -235,11 +278,13 @@
         this.fixPreviewThumb();
       },
 
-      // 上传图片预览改为使用背景图片按比例缩放方式
+      /**
+       * 上传图片预览改为使用背景图片按比例缩放方式
+       */
       fixPreviewThumb() {
-        clearInterval(this.fixUploadInterval);
+        clearInterval(this.fixThumbInterval);
         let timestamp = new Date().getTime();
-        let fixUploadInterval = this.fixUploadInterval = setInterval(function () {
+        let fixThumbInterval = this.fixThumbInterval = setInterval(function () {
           $.each($('.upload-img-preview li'), function (key, val) {
             let thisObj = $('.upload-img-preview li').eq(key);
             if(thisObj.find('img').length > 0) {
@@ -249,11 +294,16 @@
 
           // 5s后停止
           if((new Date().getTime()) - timestamp >= 5000) {
-            clearInterval(fixUploadInterval);
+            clearInterval(fixThumbInterval);
           }
         }, 500);
       },
 
+      /**
+       * 上传图片前检查合法性
+       * @param file
+       * @returns {boolean}
+       */
       beforeUpload (file) {
         const isJPG = file.type === 'image/jpeg';
         const isPNG = file.type === 'image/png';
@@ -273,11 +323,24 @@
         return true;
       },
 
+      /**
+       * 上传错误处理
+       * @param err
+       * @param file
+       * @param fileList
+       */
       handleUploadError (err, file, fileList) {
         ELEMENT.Message.info('服务器打了个盹^_^');
         console.log(err)
       },
 
+      /**
+       * 上传成功处理
+       * @param response
+       * @param file
+       * @param fileList
+       * @returns {boolean}
+       */
       handleUploadSuccess (response, file, fileList) {
         if(typeof this.options.callback !== 'function') {
           ELEMENT.Message.error('请先设置回调函数');
@@ -297,13 +360,17 @@
         }
       },
 
-      // 超过文件个数提示
+      /**
+       * 选择上传文件超过限制文件个数提示
+       */
       onExceedTip () {
         ELEMENT.Message.warning('最多只能选择' + this.options.limit + '张图片');
       },
 
+      /**
+       * 重置参数
+       */
       reset () {
-
         if(!this.options.enablePick) {
           this.activeTab = 'upload';
         } else if(!this.options.enableUpload) {
@@ -323,7 +390,7 @@
     },
 
     mounted(){
-      this.loadImg();
+      this.loadImgList();
     },
 
     computed: {
@@ -406,6 +473,7 @@
           width: $imgSize;
           cursor: pointer;
           position: relative;
+          font-size:12px;
 
           img {
             width: $imgSize;
@@ -414,7 +482,6 @@
           }
 
           .title {
-            font-size:12px;
             line-height:24px;
             height:24px;
             display: block;
@@ -422,6 +489,31 @@
             background: $bg;
             padding: 0 5px;
           }
+
+          .label {
+            position: absolute;
+            z-index:9;
+            left: 0;
+            bottom: 24px;
+            width:100%;
+            height:21px;
+            line-height:21px;
+            text-align: center;
+            color:#fff;
+
+            &:after {
+              content: ' ';
+              position: absolute;
+              left: 0;
+              bottom: 0;
+              width:100%;
+              height:21px;
+              background: #000;
+              opacity: .3;
+              z-index:-1;
+            }
+          }
+
           .selected {
             position: absolute;
             right: -3px;

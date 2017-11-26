@@ -18,6 +18,9 @@
         width: 90px;
         height:90px;
         margin:8px;
+        display: block;
+        border:1px solid #e0e0e0;
+        border-radius: 3px;
       }
     </style>
   </head>
@@ -25,7 +28,7 @@
 
     <div id="app">
       <el-button type="primary" @click="single">单选</el-button>
-      <el-button type="primary" @click="multiple">多选</el-button>
+      <el-button type="primary" @click="defaultHandle">多选</el-button>
       <el-button type="primary" @click="pickOnly">只选取</el-button>
       <el-button type="primary" @click="uploadOnly">只上传</el-button>
 
@@ -46,40 +49,48 @@
           return {
             img_list: [],
             opts: {
-              imgUploadUrl: './test/upload.json',
-              imgListUrl: './test/list.json',
+              uploadUrl: 'http://imgbox.imcm.me/test/upload.json',
+              listUrl: 'http://imgbox.imcm.me/test/list.json',
               multiple: true,
               enablePick: true,
               enableUpload: true,
               callback: function(img){
-                app.img_list.push(img);
+                // 选中图片后回调处理
+                this.img_list.push(img);
               }
             }
           }
         },
         methods: {
-          multiple: function () {
-            Vue.elxImgbox(this.opts);
+          defaultHandle: function () {
+            this.$elxImgbox(this.opts);
           },
           single: function () {
-            var options = JSON.parse(JSON.stringify(this.opts));
-            options.multiple = false;
-            Vue.elxImgbox(options);
+            this.$elxImgbox(this.opt({multiple: false}));
           },
           pickOnly: function () {
-            var options = JSON.parse(JSON.stringify(this.opts));
-            options.enableUpload = false;
-            Vue.elxImgbox(options);
+            Vue.elxImgbox(this.opt({enableUpload: false}));
           },
           uploadOnly: function () {
-            var options = JSON.parse(JSON.stringify(this.opts));
-            options.enablePick = false;
-            Vue.elxImgbox(options);
+            Vue.elxImgbox(this.opt({enablePick: false}));
+          },
+
+          opt: function (myOpts) {
+            var myOpts = myOpts || {};
+            var opts = JSON.parse(JSON.stringify(this.opts));
+            opts.callback = this.opts.callback;
+
+            for(var i in myOpts) {
+              opts[i] = myOpts[i];
+            }
+
+            return opts;
           }
         }
       });
 
-      app.multiple();
+      // 加载完即弹出默认配置的选项
+      app.defaultHandle();
     </script>
   </body>
 </html>
