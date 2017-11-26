@@ -23,6 +23,25 @@
         border-radius: 3px;
       }
     </style>
+    <script>
+      // 不支持IE9及以下
+      window.onload = function() {
+        var body = document.getElementsByTagName('body')[0];
+        body.style.background = '#fff';
+        body.style.height = '100%';
+
+        body.innerHTML = [
+          '<div style="border:1px solid #e0e0e0; margin: 80px auto; width:480px; background:#f8f8f8; padding:36px; text-align:center;">',
+          '  <h2><b>你使用的IE浏览器版本过低</n></h2>',
+          '  <p>请使用360、谷歌、火狐等浏览器浏览！</p>',
+          '  <a href="http://se.360.cn/" ',
+          '    style="margin:16px auto 0; display:block; width:160px; color:#fff; font-size:20px; height:36px; line-height:36px;background:#5EA433;border:1px solid #478239;">',
+          '      立即下载360浏览器',
+          '  </a>',
+          '</div>'
+        ].join('');
+      }
+    </script>
   </head>
   <body>
 

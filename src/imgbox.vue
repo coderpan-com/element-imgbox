@@ -418,6 +418,7 @@
     .el-tabs {
       .el-tabs__header {
         margin-right: 0;
+        margin-top: 5px;
         .el-tabs__nav-wrap::after {
           background: $bg;
         }
@@ -550,7 +551,7 @@
       }
 
       .el-pagination {
-        background: $bg;
+        background: #f9f9f9;
         position: relative;
         padding: 5px;
         margin: 0 24px 0 20px;
