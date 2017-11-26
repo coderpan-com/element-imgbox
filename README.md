@@ -3,7 +3,7 @@
 > Image browse and upload plugin base on Vue & element-ui  
 > 基于Vue与element-ui的图片选取和上传插件
 
-[Demo](https://imgbox.imcm.me/)
+[Demo](http://imgbox.imcm.me/)
 
 ## require
  - Vue 2.5+
@@ -12,7 +12,7 @@
 
 ## options
 
-```json
+```
 {
   uploadUrl: '',       // 图片上传URL
   listUrl: '',         // 图片列表数据URL
