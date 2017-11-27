@@ -1,11 +1,13 @@
-import ElxImgbox from './imgbox.vue';
+import Imgbox from './imgbox.vue';
 
 const ElxImgboxPlugin = {
   install(Vue) {
-    const CONSTRUCTOR = Vue.extend(ElxImgbox);
+    const CONSTRUCTOR = Vue.extend(Imgbox);
+
+    // 插件实例（共享）
     let imgbox;
 
-    function elxImgbox(options = {}) {
+    Vue.elxImgbox = Vue.prototype.$elxImgbox = function(options = {}) {
       imgbox || (imgbox = new CONSTRUCTOR);
 
       for(const i in options) {
@@ -17,12 +19,8 @@ const ElxImgboxPlugin = {
         document.querySelector('body').appendChild(vm.$el);
       }
 
-      if(!imgbox.options.enablePick) {
-        imgbox.activeTab = 'upload';
-      } else if(!imgbox.options.enableUpload) {
-        imgbox.activeTab = 'pick';
-      } else if(imgbox.activeTab === 'upload' && imgbox.options.enablePick) {
-        // 默认进入选取图片
+      // 已选取上传tab但上传未启用，则转到图片选取（仅演示时有这种情况，正式使用不会有）
+      if(imgbox.activeTab === 'upload' && !imgbox.options.enableUpload) {
         imgbox.activeTab = 'pick';
       }
 
@@ -35,11 +33,10 @@ const ElxImgboxPlugin = {
 
       return imgbox;
     }
-
-    Vue.elxImgbox = Vue.prototype.$elxImgbox = elxImgbox;
   }
 }
 
+// 自动启用插件
 if (typeof window !== 'undefined' && window.Vue) {
   window.Vue.use(ElxImgboxPlugin);
 }

@@ -7,12 +7,14 @@
     <style>
       #app {
         text-align: center;
-        margin-top: 50px;
-      }
-      #app .img-list {
-        margin:20px auto;
+        margin:50px auto;
         width: 800px;
       }
+
+      #app .img-list {
+        margin-top:20px;
+      }
+
       #app .img-list img {
         float: left;
         width: 90px;
@@ -49,10 +51,11 @@
   <body>
 
     <div id="app">
-      <el-button type="primary" @click="single">单选</el-button>
-      <el-button type="primary" @click="defaultHandle">多选</el-button>
-      <el-button type="primary" @click="pickOnly">只选取</el-button>
-      <el-button type="primary" @click="uploadOnly">只上传</el-button>
+      <div class="plugin-btns">
+        <el-button type="primary" @click="single">单选</el-button>
+        <el-button type="primary" @click="defaultHandle">多选</el-button>
+        <el-button type="primary" @click="pickOnly">不启用上传</el-button>
+      </div>
 
       <div class="img-list">
         <img :src="img.thumb" alt="" v-for="img in img_list" :url="img.url" :path="img.path">
@@ -74,9 +77,8 @@
               uploadUrl: 'http://imgbox.imcm.me/test/upload.json',
               listUrl: 'http://imgbox.imcm.me/test/list.json',
               multiple: true,
-              enablePick: true,
               enableUpload: true,
-              callback: function(img){
+              onSelect: function(img){
                 // 选中图片后回调处理
                 app.img_list.push(img);
               }
@@ -93,14 +95,11 @@
           pickOnly: function () {
             Vue.elxImgbox(this.opt({enableUpload: false}));
           },
-          uploadOnly: function () {
-            Vue.elxImgbox(this.opt({enablePick: false}));
-          },
 
           opt: function (myOpts) {
             var myOpts = myOpts || {};
             var opts = JSON.parse(JSON.stringify(this.opts));
-            opts.callback = this.opts.callback;
+            opts.onSelect = this.opts.onSelect;
 
             for(var i in myOpts) {
               opts[i] = myOpts[i];

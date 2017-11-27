@@ -2,7 +2,7 @@
 <template>
   <el-dialog title="我的图片" :visible.sync="visible" id="elx-imgbox" class="elx-imgbox" top="5vh">
     <el-tabs v-model="activeTab" tab-position="left">
-      <el-tab-pane label="选择图片" name="pick" class="pick-block" v-if="options.enablePick">
+      <el-tab-pane label="选择图片" name="pick" class="pick-block">
         <div class="img-list-loading" v-if="isLoading">
           <div class="el-icon-loading"></div>
         </div>
@@ -61,6 +61,9 @@
 
 
 <script type="text/babel">
+  /**
+   * 仅作为插件方式提供外部js调用，不提供组件标签
+   */
   export default {
     name: 'ElxImgbox',
 
@@ -73,10 +76,9 @@
         options: {
           uploadUrl: '',      // 图片上传URL
           listUrl: '',        // 图片列表数据URL
-          multiple: true,     // 是否支持选取多个图片// 是否支持选取多个图片
+          multiple: true,     // 是否支持选取多个图片
           limit: 10,          // 一批次最多可上传图片数
-          callback: null,     // 选择后回调函数
-          enablePick: true,   // 是否启用图片选取
+          onSelect: null,     // 选择后回调函数
           enableUpload: true, // 是否启用图片上传
           maxSize: 2          // 最大尺寸（M）
         },
@@ -239,13 +241,13 @@
        * @returns {boolean}
        */
       handleConfirmSelect () {
-        if(typeof this.options.callback !== 'function') {
+        if(typeof this.options.onSelect !== 'function') {
           ELEMENT.Message.error('请先设置回调函数');
           return false;
         }
 
         const cb = $.Callbacks();
-        cb.add(this.options.callback);
+        cb.add(this.options.onSelect);
 
         // 单选返回一个图片
         for(const i in this.selectedImgs) {
@@ -342,13 +344,13 @@
        * @returns {boolean}
        */
       handleUploadSuccess (response, file, fileList) {
-        if(typeof this.options.callback !== 'function') {
+        if(typeof this.options.onSelect !== 'function') {
           ELEMENT.Message.error('请先设置回调函数');
           return false;
         }
 
         const cb = $.Callbacks();
-        cb.add(this.options.callback);
+        cb.add(this.options.onSelect);
         cb.fire(response.uploadfile_response);
 
         this.uploadSuccessCount ++;
@@ -545,13 +547,12 @@
         position: relative;
         padding: 5px;
         margin: 0 24px 0 20px;
+        text-align: right;
+        float: none;
 
         * {
           background: none;
         }
-      }
-      .el-pagination {
-        text-align: right;
       }
     }
 
