@@ -4,11 +4,17 @@ const ElxImgboxPlugin = {
   install(Vue) {
     const CONSTRUCTOR = Vue.extend(Imgbox);
 
-    // 插件实例（共享）
-    let imgbox;
-
-    Vue.elxImgbox = Vue.prototype.$elxImgbox = function(options = {}) {
-      imgbox || (imgbox = new CONSTRUCTOR);
+    // 定义插件
+    Vue.elxImgbox = Vue.prototype.$elxImgbox = function(options = {}, selectedImgs) {
+      let imgbox = new CONSTRUCTOR;
+      if (typeof selectedImgs === 'undefined') {
+        imgbox.selectedImgs = {}
+      } else {
+        imgbox.selectedImgs = JSON.parse(JSON.stringify(selectedImgs))
+        for (let i = 0; i < imgbox.selectedImgs.length; i++) {
+          imgbox.selectedImgs[i].selected = true
+        }
+      }
 
       for(const i in options) {
         imgbox.options[i] = options[i];
@@ -22,11 +28,6 @@ const ElxImgboxPlugin = {
       // 已选取上传tab但上传未启用，则转到图片选取（仅演示时有这种情况，正式使用不会有）
       if(imgbox.activeTab === 'upload' && !imgbox.options.enableUpload) {
         imgbox.activeTab = 'pick';
-      }
-
-      // 切换为单选时（实际应用一般不会发生），清空所有选项
-      if(!imgbox.options.multiple) {
-        imgbox.handleCancelAll();
       }
 
       imgbox.visible = true;

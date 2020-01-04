@@ -5,17 +5,22 @@
     <title>elx-imgbox</title>
     <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.0.5/theme-chalk/index.css">
     <style>
-      #app {
-        text-align: center;
-        margin:50px auto;
+      [v-cloak]{
+        display: none;
+      }
+
+      .container {
+        clear: both;
+        margin:0 auto;
+        padding-top: 80px;
         width: 800px;
       }
 
-      #app .img-list {
+      .container .img-list {
         margin-top:20px;
       }
 
-      #app .img-list img {
+      .container .img-list img {
         float: left;
         width: 90px;
         height:90px;
@@ -50,68 +55,70 @@
   </head>
   <body>
 
-    <div id="app">
-      <div class="plugin-btns">
-        <el-button type="primary" @click="single">单选</el-button>
-        <el-button type="primary" @click="defaultHandle">多选</el-button>
-        <el-button type="primary" @click="pickOnly">不启用上传</el-button>
-      </div>
-
-      <div class="img-list">
-        <img :src="img.thumb" alt="" v-for="img in img_list" :url="img.url" :path="img.path">
-      </div>
+  <div class="container" id="app-1" v-cloak>
+    <div class="plugin-btns">
+      <el-button type="primary" @click="$elxImgbox(opts, imgList)">上传多图</el-button>
     </div>
 
-    <script src="https://cdn.bootcss.com/vue/2.5.8/vue.js"></script>
-    <script src="https://cdn.bootcss.com/element-ui/2.0.5/index.js"></script>
-    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <div class="img-list">
+      <img :src="img.thumb" alt="" v-for="img in imgList" :url="img.url" :path="img.path">
+    </div>
+  </div>
+
+  <div class="container" id="app-2" v-cloak>
+    <div class="plugin-btns">
+      <el-button type="primary" @click="$elxImgbox(opts, imgList)">上传单图</el-button>
+    </div>
+
+    <div class="img-list">
+      <img :src="img.thumb" alt="" v-for="img in imgList" :url="img.url" :path="img.path">
+    </div>
+  </div>
+
+    <script src="https://cdn.staticfile.org/vue/2.6.10/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/element-ui/2.13.0/index.js"></script>
+    <script src="https://cdn.staticfile.org/axios/0.19.0/axios.min.js"></script>
     <script src="./dist/imgbox.js"></script>
 
     <script>
-      var app = new Vue({
-        el: '#app',
-        data:function(){
+      var app1 = new Vue({
+        el: '#app-1',
+        data (){
           return {
-            img_list: [],
+            imgList: [],
             opts: {
-              uploadUrl: 'http://imgbox.imcm.me/test/upload.json',
-              listUrl: 'http://imgbox.imcm.me/test/list.json',
-              multiple: true,
-              enableUpload: true,
-              onSelect: function(img){
-                // 选中图片后回调处理
-                app.img_list.push(img);
+              uploadUrl: 'test/upload.json',
+              listUrl: 'test/list.json',
+              // multiple: true,     // 是否支持选取多个图片
+              // limit: 10,          // 一批次最多可上传图片数
+              // enableUpload: true, // 是否启用图片上传
+              // maxSize: 2,         // 最大尺寸（M）
+              // data: {},           // 上传时附带的额外参数
+              // withCredentials: true, // 支持发送 cookie 凭证信息
+              onSelect: (selectedImgs) => {
+                this.imgList = selectedImgs
               }
             }
           }
-        },
-        methods: {
-          defaultHandle: function () {
-            this.$elxImgbox(this.opts);
-          },
-          single: function () {
-            this.$elxImgbox(this.opt({multiple: false}));
-          },
-          pickOnly: function () {
-            Vue.elxImgbox(this.opt({enableUpload: false}));
-          },
-
-          opt: function (myOpts) {
-            var myOpts = myOpts || {};
-            var opts = JSON.parse(JSON.stringify(this.opts));
-            opts.onSelect = this.opts.onSelect;
-
-            for(var i in myOpts) {
-              opts[i] = myOpts[i];
+        }
+      });
+      var app2 = new Vue({
+        el: '#app-2',
+        data () {
+          return {
+            imgList: [],
+            opts: {
+              uploadUrl: 'test/upload.json',
+              listUrl: 'test/list.json',
+              multiple: false,
+              // enableUpload: true,
+              onSelect: (selectedImgs) => {
+                this.imgList = selectedImgs
+              }
             }
-
-            return opts;
           }
         }
       });
-
-      // 加载完即弹出默认配置的选项
-      var imgbox = Vue.elxImgbox(app.opts);
     </script>
   </body>
 </html>

@@ -1,6 +1,5 @@
-
 <template>
-  <el-dialog title="我的图片" :visible.sync="visible" id="elx-imgbox" class="elx-imgbox" top="5vh">
+  <el-dialog title="图片管理器" :visible.sync="visible" id="elx-imgbox" class="elx-imgbox" top="5vh">
     <el-tabs v-model="activeTab" tab-position="left">
       <el-tab-pane label="选择图片" name="pick" class="pick-block">
         <div class="img-list-loading" v-if="isLoading">
@@ -8,7 +7,7 @@
         </div>
 
         <div class="elx-main img-list">
-          <div class="img-item" v-for="(img, imgKey) in imgRes.list" @click="handleSelectImage(img)">
+          <div class="img-item" v-for="img in imgRes.list" @click="onClickImage(img)">
             <div class="thumb-wp"><img :src="img.thumb" alt="img.name"></div>
             <div class="title">{{img.name}}</div>
             <div class="label" v-if="img.label">{{img.label}}</div>
@@ -16,14 +15,14 @@
           </div>
         </div>
 
-        <el-pagination layout="total, prev, pager, next" :total="imgRes.total" @current-change="handlePageChange"></el-pagination>
+        <el-pagination layout="total, prev, pager, next" :total="imgRes.total" @current-change="onPageNumChange"></el-pagination>
 
         <div class="elx-foot">
-          <el-badge :value="selectedImgCount" class="item">
-            <el-button type="primary" size="medium" :disabled="selectedImgCount == 0" @click="handleConfirmSelect">确定选择</el-button>
+          <el-badge :value="selectedImgs.length" class="item">
+            <el-button type="primary" size="medium" :disabled="selectedImgs.length == 0" @click="onConfirmSelect">确定选择</el-button>
           </el-badge>
           <el-button type="primary" size="medium" @click="activeTab='upload'" plain v-if="options.enableUpload">上传图片</el-button>
-          <el-button type="text" @click="handleCancelAll" v-if="options.multiple">取消已选</el-button>
+          <el-button type="text" @click="onCancelAll" v-if="selectedImgs.length > 0">取消已选</el-button>
         </div>
       </el-tab-pane>
 
@@ -35,20 +34,33 @@
             class="upload-img-preview"
             list-type="picture-card"
             accept="image/*"
+            :with-credentials="options.withCredentials"
             :action="options.uploadUrl"
             :auto-upload="false"
             :multiple="options.multiple"
             :limit="options.limit"
             :before-upload="beforeUpload"
-            :on-change="handleOnChange"
-            :on-progress="handleOnProgress"
-            :on-success="handleUploadSuccess"
-            :on-error="handleUploadError"
+            :on-change="onChange"
+            :on-progress="onProgress"
+            :on-success="onUploadSuccess"
+            :on-error="onUploadError"
             :on-exceed="onExceedTip">
+
             <i class="el-icon-plus"></i>
+
+            <div slot="file" slot-scope="{file}" class="wp" :style="'background-image: url(' + file.url + ')'">
+              <span class="el-upload-list__item-actions">
+                <a class="el-upload-list__item-preview" :href="file.url" target="_blank">
+                  <i class="el-icon-zoom-in"></i>
+                </a>
+                <span v-if="!disabled" class="el-upload-list__item-delete" @click="onRemove(file)">
+                  <i class="el-icon-delete"></i>
+                </span>
+              </span>
+            </div>
           </el-upload>
 
-          <div class="upload-tip">仅支持jpg、gif、png三种格式, 大小不超过2 MB</div>
+          <div class="upload-tip">{{ typeTip() }}，{{ sizeTip() }}</div>
 
           <div class="elx-foot">
             <el-button type="primary" size="medium" @click="handleConfirmUpload">确定上传</el-button>
@@ -80,16 +92,18 @@
           limit: 10,          // 一批次最多可上传图片数
           onSelect: null,     // 选择后回调函数
           enableUpload: true, // 是否启用图片上传
-          maxSize: 2          // 最大尺寸（M）
+          maxSize: 2,         // 最大尺寸（M）
+          data: {},           // 上传时附带的额外参数
+          withCredentials: true // 支持发送 cookie 凭证信息
         },
 
         isLoading: true,
         visible: true,
         activeTab: 'pick',
-        selectedImgs: {},
-        selectedImgCount: 0,
+        selectedImgs: [],
         uploadSuccessCount: 0,
         fixThumbInterval: null,
+
         imgRes: {
           list: [],
           total: 0,
@@ -98,58 +112,32 @@
     },
 
     methods: {
-
-      /**
-       * 多选时同步已选图片数量
-       */
-      syncSelectedImgCount() {
-        let selectedCount = 0;
-        $.each(this.selectedImgs, function (key, val) {
-          selectedCount ++;
-        });
-        this.selectedImgCount = selectedCount;
-      },
-
       /**
        * 点击图片时选中或取消选中图片
        * @param img object
        */
-      handleSelectImage(img){
-        if(typeof this.selectedImgs[img.thumb] === 'object') {
-          // 取消选择图片
+      onClickImage(img){
+        var imgIndex = this.selectedImgIndex(img);
+        if (imgIndex > -1) {
+          // 取消图片已选状态
           img.selected = false;
-
-          let selectedImgs = {};
-          if(this.options.multiple) {
-            $.each(this.selectedImgs, function (key, val) {
-              if (key === img.thumb) {
-                return;
-              }
-              selectedImgs[key] = val;
-            });
-          }
-
-          this.selectedImgs = selectedImgs;
-        } else {
-          // 选择图片
-          if(this.options.limit > 0 && this.selectedImgCount >= this.options.limit) {
-            this.$message({
-              message: '最多只能选择' + this.options.limit + '张图片',
-              type: 'warning'
-            });
-            return;
-          }
-
-          if(!this.options.multiple) {
-            // 单选时，取消已选
-            this.handleCancelAll();
-          }
-
-          img.selected = true;
-          this.selectedImgs[img.thumb] = JSON.parse(JSON.stringify(img));
+          this.selectedImgs.splice(imgIndex, 1)
+          return;
         }
 
-        this.syncSelectedImgCount();
+        // 选择图片
+        if(this.options.limit > 0 && this.selectedImgs.length >= this.options.limit) {
+          this.onExceedTip();
+          return;
+        }
+
+        if(!this.options.multiple) {
+          // 单选时，取消已选
+          this.onCancelAll();
+        }
+
+        img.selected = true;
+        this.selectedImgs.push(JSON.parse(JSON.stringify(img)));
       },
 
       /**
@@ -160,77 +148,85 @@
         const listUrl = this.options.listUrl;
 
         if(!listUrl) {
+          throw new Error('listUrl is required');
           return;
         }
 
-        let data = this.$data;
         this.isLoading = true;
 
-        $(function () {
-          /**
-           * res = {
-           *     list: [{name: img_name, thumb: img_thumb_url ...}, ...],
-           *     total: number
-           * }
-           */
-          $.getJSON(listUrl, {page: page, rows: 15, _r: Math.random()}, function (res) {
-            let imgs = [];
-            data.imgRes.total = parseInt(res.total);
+        /**
+         * res = {
+         *     list: [{name: img_name, thumb: img_thumb_url ...}, ...],
+         *     total: number
+         * }
+         */
+        axios.get(listUrl, {params: {page: page, rows: 15, _r: Math.random()}}).then(response => {
+          const res = response.data;
+          let imgs = [];
+          this.imgRes.total = parseInt(res.total);
 
-            let listCount = 0;
-            for(const i in res.list) {
-              listCount ++;
+          let listCount = 0;
+          for(const i in res.list) {
+            listCount ++;
 
-              // 每页只显示15条
-              if(listCount > 15) {
-                break;
-              }
-
-              let img = res.list[i];
-
-              // 图片缩略图
-              if(typeof img.thumb !== 'string') {
-                let err = "图片数据必须包含'thumb'属性！";
-                alert(err);
-                throw err;
-              }
-
-              // 图片名
-              if(typeof img.name !== 'string') {
-                img.name = img.thumb.substr(img.thumb.lastIndexOf('/') + 1);
-              }
-
-              // 图片其他信息
-              if(typeof img.label !== 'string') {
-                img.label = '';
-              }
-
-              // 图片选中状态
-              img.selected = (typeof data.selectedImgs[img.thumb] === 'object');
-
-              imgs.push(img);
+            // 每页只显示15条
+            if(listCount > 15) {
+              break;
             }
 
-            data.imgRes.list = imgs;
-            data.isLoading = false;
-          });
+            let img = res.list[i];
+
+            // 图片缩略图
+            if(typeof img.thumb !== 'string') {
+              throw new Error("图片数据必须包含'thumb'属性！");
+            }
+
+            // 图片名
+            if(typeof img.name !== 'string') {
+              img.name = img.thumb.substr(img.thumb.lastIndexOf('/') + 1);
+            }
+
+            // 图片其他信息
+            if(typeof img.label !== 'string') {
+              img.label = '';
+            }
+
+            // 图片选中状态
+            img.selected = this.selectedImgIndex(img) > -1;
+
+            imgs.push(img);
+          }
+
+          this.imgRes.list = imgs;
+          this.isLoading = false;
         });
+      },
+
+      selectedImgIndex(img) {
+        for (let i = 0; i < this.selectedImgs.length; i++) {
+          var selectedImg = this.selectedImgs[i]
+
+          if (selectedImg.url == img.url) {
+            return i;
+          }
+        }
+
+        return -1;
       },
 
       /**
        * 分页页面变化时刷新数据
        * @param page
        */
-      handlePageChange (page) {
+      onPageNumChange (page) {
         this.loadImgList(page);
       },
 
       /**
        *  取消已选
        */
-      handleCancelAll () {
-        this.selectedImgCount = 0;
-        this.selectedImgs = {};
+      onCancelAll () {
+        this.selectedImgs = [];
         for(const i in this.imgRes.list) {
           this.imgRes.list[i].selected = false;
         }
@@ -240,20 +236,13 @@
        * 确认选择从列表选择的图片
        * @returns {boolean}
        */
-      handleConfirmSelect () {
+      onConfirmSelect () {
         if(typeof this.options.onSelect !== 'function') {
           ELEMENT.Message.error('请先设置回调函数');
           return false;
         }
 
-        const cb = $.Callbacks();
-        cb.add(this.options.onSelect);
-
-        // 单选返回一个图片
-        for(const i in this.selectedImgs) {
-          const img = this.selectedImgs[i];
-          cb.fire(img);
-        }
+        this.options.onSelect(JSON.parse(JSON.stringify(this.selectedImgs)));
 
         // 隐藏，取消已选
         this.visible = false;
@@ -267,38 +256,25 @@
         this.$refs.upload.submit();
       },
 
-      handleOnProgress(event, file, fileList){
+      onProgress(event, file, fileList){
 
       },
 
-      handleOnChange(file, fileList) {
-        // 单张图片上传保留最后一张图片
+      onChange(file, fileList) {
+        // 单张图片上传选中最后一张图片
         if(!this.options.multiple && fileList.length > 1) {
-          fileList = fileList.shift();
+          fileList.splice(0, fileList.length - 2)
         }
-
-        this.fixPreviewThumb();
       },
 
-      /**
-       * 上传图片预览改为使用背景图片按比例缩放方式
-       */
-      fixPreviewThumb() {
-        clearInterval(this.fixThumbInterval);
-        let timestamp = new Date().getTime();
-        let fixThumbInterval = this.fixThumbInterval = setInterval(function () {
-          $.each($('.upload-img-preview li'), function (key, val) {
-            let thisObj = $('.upload-img-preview li').eq(key);
-            if(thisObj.find('img').length > 0) {
-              thisObj.css('background-image', 'url(' + thisObj.find('img').attr('src') + ')');
-            }
-          });
+      typeTip()
+      {
+        return '仅支持 jpg/png/gif 图片';
+      },
 
-          // 5s后停止
-          if((new Date().getTime()) - timestamp >= 5000) {
-            clearInterval(fixThumbInterval);
-          }
-        }, 500);
+      sizeTip()
+      {
+        return '大小不能超过 ' + this.options.maxSize + 'M';
       },
 
       /**
@@ -313,12 +289,12 @@
         const isSize = file.size / (1024*1024) < this.options.maxSize;
 
         if (!isJPG && !isPNG &&!isGif) {
-          ELEMENT.Message.error('仅支持 JPG/PNG/GIF 3种格式');
+          ELEMENT.Message.error(this.typeTip());
           return false;
         }
 
         if (!isSize) {
-          ELEMENT.Message.error('上传图片大小不能超过 ' + this.options.maxSize + 'M');
+          ELEMENT.Message.error(this.sizeTip());
           return false;
         }
 
@@ -331,7 +307,7 @@
        * @param file
        * @param fileList
        */
-      handleUploadError (err, file, fileList) {
+      onUploadError (err, file, fileList) {
         ELEMENT.Message.info('服务器打了个盹^_^');
         console.log(err)
       },
@@ -343,16 +319,19 @@
        * @param fileList
        * @returns {boolean}
        */
-      handleUploadSuccess (response, file, fileList) {
-        if(typeof this.options.onSelect !== 'function') {
-          ELEMENT.Message.error('请先设置回调函数');
-          return false;
+      onUploadSuccess (response, file, fileList) {
+        console.log(response, file, fileList)
+
+        var img = response.uploadfile_response;
+
+        // 去掉列表第二张图，压入列表尾部
+        if (this.selectedImgs.length >= this.options.limit) {
+          this.selectedImgs.splice(1, 1);
         }
 
-        const cb = $.Callbacks();
-        cb.add(this.options.onSelect);
-        cb.fire(response.uploadfile_response);
+        this.selectedImgs.push(img);
 
+        this.onConfirmSelect();
         this.uploadSuccessCount ++;
 
         if(fileList.length === this.uploadSuccessCount) {
@@ -368,6 +347,19 @@
         ELEMENT.Message.warning('最多只能选择' + this.options.limit + '张图片');
       },
 
+      onPreview (file) {
+        window.open(file.url)
+      },
+
+      onRemove (file) {
+        const uploadFiles = this.$refs.upload.uploadFiles;
+        for (let i = 0; i < uploadFiles.length; i++) {
+          if (uploadFiles[i].uid === file.uid) {
+            uploadFiles.splice(i, 1)
+          }
+        }
+      },
+
       /**
        * 重置参数
        */
@@ -377,7 +369,7 @@
         }
 
         this.uploadSuccessCount = 0;
-        this.handleCancelAll();
+        this.onCancelAll();
       }
     },
 
@@ -390,9 +382,14 @@
     }
   };
 </script>
+
 <style lang="scss">
   .elx-imgbox {
     $bg: #f6f6f6;
+
+    .el-badge {
+      vertical-align: bottom;
+    }
 
     .el-dialog {
       width: 720px;
@@ -561,15 +558,21 @@
         padding:20px;
 
         /* 上传图片预览改为使用背景图片按比例缩放方式 */
-        .el-upload--picture-card, .el-upload-list--picture-card .el-upload-list__item {
+        .el-upload--picture-card, .el-upload-list--picture-card .el-upload-list__item, .el-upload-list--picture-card .el-upload-list__item .wp {
           width: 90px;
           height: 90px;
           line-height: 98px;
           background-size: cover;
           background-position: 50% 50%;
-          .el-upload-list__item-thumbnail {
-            display: none;
+          
+          a {
+            color: #fff;
           }
+        }
+
+        .el-upload-list--picture-card .el-upload-list__item-status-label i {
+          margin-top: 12px;
+          vertical-align: top;
         }
       }
 
@@ -585,11 +588,6 @@
         padding: 20px 0 0 20px;
       }
 
-    }
-
-    .el-upload-list--picture-card .el-upload-list__item-status-label i {
-      margin-top: 12px;
-      vertical-align: top;
     }
   }
 </style>

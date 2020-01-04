@@ -1,3 +1,4 @@
 node_modules/
 .idea
 /test/img/
+/package-lock.json
