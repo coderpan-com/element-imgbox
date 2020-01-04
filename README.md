@@ -8,20 +8,21 @@
 ## require
  - Vue 2.5+
  - element-ui 2+
- - jQuery
+ - axios 0.19+
 
 ## options
 
 ```
 {
-  uploadUrl: '',       // 图片上传URL
-  listUrl: '',         // 图片列表数据URL
-  multiple: true,      // 是否支持选取多个图片
-  limit: 10,           // 一批次最多可上传图片数
-  callback: null,      // 选择后回调函数
-  enablePick: true,    // 是否启用图片选取
-  enableUpload: true,  // 是否启用图片上传
-  maxSize: 2           // 最大尺寸（M）
+  uploadUrl: '',      // 图片上传URL
+  listUrl: '',        // 图片列表数据URL
+  multiple: true,     // 是否支持选取多个图片
+  limit: 10,          // 一批次最多可上传图片数
+  onSelect: null,     // 选择后回调函数
+  enableUpload: true, // 是否启用图片上传
+  maxSize: 2,         // 最大尺寸（M）
+  data: {},           // 上传时附带的额外参数
+  withCredentials: true // 支持发送 cookie 凭证信息
 }
 ```
 
@@ -39,6 +40,7 @@
   "uploadfile_response": {
     "name":"图片名",
     "thumb":"图片缩略图链接",
+    "url": "图片URL",
     "你需要的其他属性": "其他属性值"
   }
 }
@@ -50,7 +52,8 @@
   "list":[
     {
       "name": "图片名",
-      "thumb": "图片缩略图链接",
+      "thumb": "图片缩略图URL",
+      "url": "图片URL",
       "label": "图片长x宽",
       "你需要的其他属性": "其他属性值"
     }
