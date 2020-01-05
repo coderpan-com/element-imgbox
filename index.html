@@ -12,113 +12,56 @@
       .container {
         clear: both;
         margin:0 auto;
-        padding-top: 80px;
         width: 800px;
       }
 
-      .container .img-list {
-        margin-top:20px;
+      h1 {
+        margin: 80px 0 20px;
       }
 
-      .container .img-list img {
-        float: left;
-        width: 90px;
-        height:90px;
-        margin:8px;
-        display: block;
-        border:1px solid #e0e0e0;
-        border-radius: 3px;
-      }
     </style>
-
-    <!--[if lt IE 10]>
-    <script>
-      // 不支持IE9及以下
-      window.onload = function() {
-        var body = document.getElementsByTagName('body')[0];
-        body.style.background = '#fff';
-        body.style.height = '100%';
-
-        body.innerHTML = [
-          '<div style="border:1px solid #e0e0e0; margin: 80px auto; width:480px; background:#f8f8f8; padding:36px; text-align:center;">',
-          '  <h2><b>你使用的IE浏览器版本过低</n></h2>',
-          '  <p>请使用360、谷歌、火狐等浏览器浏览！</p>',
-          '  <a href="http://se.360.cn/" ',
-          '    style="margin:16px auto 0; display:block; width:200px; color:#fff; font-size:20px; height:36px; line-height:36px;background:#5EA433;border:1px solid #478239;">',
-          '      立即下载360浏览器',
-          '  </a>',
-          '</div>'
-        ].join('');
-      }
-    </script>
-    <![endif]-->
   </head>
   <body>
 
   <div class="container" id="app-1" v-cloak>
-    <div class="plugin-btns">
-      <el-button type="primary" @click="$elxImgbox(opts, imgList)">上传多图</el-button>
-    </div>
+    <h1>上传多图</h1>
 
-    <div class="img-list">
-      <img :src="img.thumb" alt="" v-for="img in imgList" :url="img.url" :path="img.path">
-    </div>
+    <elx-imgbox v-model="imgList" :action="action" :list-url="listUrl" :limit="10"></elx-imgbox>
+
+
+    <h1>上传单图</h1>
+
+    <elx-imgbox v-model="imgs" :action="action" :list-url="listUrl" :multiple="false"></elx-imgbox>
+
   </div>
 
-  <div class="container" id="app-2" v-cloak>
-    <div class="plugin-btns">
-      <el-button type="primary" @click="$elxImgbox(opts, imgList)">上传单图</el-button>
-    </div>
-
-    <div class="img-list">
-      <img :src="img.thumb" alt="" v-for="img in imgList" :url="img.url" :path="img.path">
-    </div>
-  </div>
-
-    <script src="https://cdn.staticfile.org/vue/2.6.10/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue/2.6.10/vue.js"></script>
     <script src="https://cdn.staticfile.org/element-ui/2.13.0/index.js"></script>
     <script src="https://cdn.staticfile.org/axios/0.19.0/axios.min.js"></script>
     <script src="./dist/imgbox.js"></script>
 
     <script>
-      var app1 = new Vue({
+      var vm = new Vue({
         el: '#app-1',
         data (){
           return {
-            imgList: [],
-            opts: {
-              uploadUrl: 'https://imgbox.imcm.me/test/upload.json',
-              listUrl: 'test/list.json',
-              // multiple: true,     // 是否支持选取多个图片
-              // limit: 10,          // 一批次最多可上传图片数
-              // enableUpload: true, // 是否启用图片上传
-              // maxSize: 2,         // 最大尺寸（M）
-              // data: {},           // 上传时附带的额外参数
-              // withCredentials: true, // 支持发送 cookie 凭证信息
-              onSelect: (selectedImgs) => {
-                this.imgList = selectedImgs
+            imgList: [
+              {
+                "thumb": "http://cdn.lizhi.fm/radio_cover/2014/04/13/10850578555531778.jpg",
+                "url": "http://cdn.lizhi.fm/radio_cover/2014/04/13/10850578555531778.jpg"
+              },
+              {
+                "thumb": "http://img.weixinyidu.com/150531/8d509835.jpg",
+                "url": "http://img.weixinyidu.com/150531/8d509835.jpg"
               }
-            }
+            ],
+            imgs: [],
+            action: 'test/upload.json',//'https://imgbox.imcm.me/test/upload.json',
+            listUrl: 'test/list.json',
           }
         }
       });
-      var app2 = new Vue({
-        el: '#app-2',
-        data () {
-          return {
-            imgList: [],
-            opts: {
-              uploadUrl: 'test/upload.json',
-              listUrl: 'test/list.json',
-              multiple: false,
-              // enableUpload: true,
-              onSelect: (selectedImgs) => {
-                this.imgList = selectedImgs
-              }
-            }
-          }
-        }
-      });
+
     </script>
   </body>
 </html>

@@ -1,7 +1,7 @@
 # elx-imgbox
 
 > Image browse and upload plugin base on Vue & element-ui  
-> 基于Vue与element-ui的图片选取和上传插件
+> 基于Vue与element-ui的图片选取和上传组件
 
 [Demo](http://imgbox.imcm.me/)
 
@@ -10,21 +10,22 @@
  - element-ui 2+
  - axios 0.19+
 
-## options
+## props
 
 ```
-{
-  uploadUrl: '',      // 图片上传URL
-  listUrl: '',        // 图片列表数据URL
-  multiple: true,     // 是否支持选取多个图片
-  limit: 10,          // 一批次最多可上传图片数
-  onSelect: null,     // 选择后回调函数
-  enableUpload: true, // 是否启用图片上传
-  maxSize: 2,         // 最大尺寸（M）
-  data: {},           // 上传时附带的额外参数
-  withCredentials: true // 支持发送 cookie 凭证信息
-}
+  action: String, // 图片上传URL
+  list-url: String, // 图片列表数据URL
+  multiple: {type: Boolean, default: true},  // 是否支持选取多个图片
+  enable-upload: {type: Boolean, default: true}, // 是否启用图片上传，不启用则只显示图片选取器
+  limit: {type: Number, default: 10}, // 最多可选择图片数量
+  max-size: {type: Number, default: 2},  // 最大尺寸（M）
+  with-data: {type: Object, default: null},  // 上传时附带的额外参数
+  with-credentials: {type: Boolean, default: true}, // 支持发送 cookie 凭证信息
+  headers: {type: Object, default: null}, // 设置上传的请求头部	Object
 ```
+
+## 数据绑定
+<elx-imgbox v-model="已选图片列表数组"></elx-imgbox>
 
 ## 关于上传
 - 支持选择单个文件和多个文件；
@@ -37,7 +38,7 @@
 ### 上传返回数据格式
 ```json
 {
-  "uploadfile_response": {
+  "item": {
     "name":"图片名",
     "thumb":"图片缩略图链接",
     "url": "图片URL",
@@ -49,7 +50,7 @@
 ### 列表数据格式
 ```json
 {
-  "list":[
+  "items":[
     {
       "name": "图片名",
       "thumb": "图片缩略图URL",
