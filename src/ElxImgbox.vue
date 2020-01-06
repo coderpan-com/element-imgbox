@@ -185,7 +185,7 @@ export default {
        *     "total": number
        * }
        */
-      axios.get(this.listUrl, { params: { page: page, rows: 15, _r: Math.random() } }).then(response => {
+      axios.get(this.listUrl, { params: { page: page, ps: 15, _r: Math.random() } }).then(response => {
         const result = response.data
         this.imgRes.total = parseInt(result.total)
 
