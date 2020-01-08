@@ -4,9 +4,9 @@ const webpack = require('webpack')
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, './dist'),
-    publicPath: '/dist/',
-    filename: 'imgbox.js'
+    path: path.resolve(__dirname, './lib'),
+    // publicPath: '/dist/',
+    filename: 'index.js'
   },
   module: {
     rules: [
@@ -85,8 +85,8 @@ module.exports = {
   },
 
   externals: {
-    vue: "Vue",
-    element: "ELEMENT"
+    vue: 'Vue',
+    element: 'ELEMENT'
   },
 
   devtool: '#eval-source-map'

@@ -2,6 +2,7 @@
 
 > Image browse and upload plugin base on Vue & element-ui  
 > 基于Vue与element-ui的图片选取和上传组件
+> 支持组件和插件两种模式
 
 [Demo](http://imgbox.imcm.me/)
 
