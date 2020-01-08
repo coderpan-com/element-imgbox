@@ -1,10 +1,10 @@
 {
   "name": "elx-imgbox",
   "description": "Image browse and upload plugin base on Vue & element-ui",
-  "version": "0.3.0",
+  "version": "0.3.4",
   "author": "erzh <cmpan@qq.com>",
+  "main": "src/index.js",
   "license": "MIT",
-  "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
