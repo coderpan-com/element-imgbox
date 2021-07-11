@@ -28,7 +28,7 @@
     props: {
       action: String, // 图片上传URL
       listUrl: String, // 图片列表数据URL
-      multiple: { type: Boolean, default: true }, // 是否支持选取多个图片
+      multiple: { type: Boolean, default: false }, // 是否支持选取多个图片
       enableUpload: { type: Boolean, default: true }, // 是否启用图片上传
       limit: { type: Number, default: 10 }, // 最多可选择图片数量
       maxSize: { type: Number, default: 2 }, // 最大尺寸（M）

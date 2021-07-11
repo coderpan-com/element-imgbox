@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>组件方式 - 上传单图</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.0.5/theme-chalk/index.css">
+  <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+
+<div class="container" id="app">
+
+  <h1>1. 组件方式 - 上传单图</h1>
+
+  <elx-imgbox v-model="imgs" :action="action" :list-url="listUrl" v-cloak></elx-imgbox>
+
+</div>
+
+<script src="https://cdn.staticfile.org/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.staticfile.org/element-ui/2.13.0/index.js"></script>
+<script src="https://cdn.staticfile.org/axios/0.19.0/axios.min.js"></script>
+<script src="../dist/index.js"></script>
+
+<script>
+  var vm = new Vue({
+    el: '#app',
+    data (){
+      return {
+        imgs: [],
+        action: 'mock/upload.json',//'https://imgbox.imcm.me/mock/upload.json',
+        listUrl: 'mock/list.json',
+      }
+    },
+    methods: {
+    }
+  });
+
+</script>
+</body>
+</html>

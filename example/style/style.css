@@ -1,0 +1,19 @@
+[v-cloak]{
+    display: none;
+}
+
+.container {
+    clear: both;
+    margin:0 auto;
+    width: 800px;
+}
+
+h1 {
+    margin: 80px 0 20px;
+}
+
+.plugin-images .el-upload--picture-card, .plugin-images .el-upload--picture-card img, .plugin-images ul li {
+    width: 90px !important;
+    height: 90px !important;
+    line-height: 100px;
+}

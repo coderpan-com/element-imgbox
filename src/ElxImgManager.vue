@@ -1,8 +1,8 @@
 <template>
   <div class="elx-imgbox">
-    <el-dialog title="图片管理器" :visible.sync="visible" class="elx-imgbox-dialog" top="5vh">
+    <el-dialog :title="__('image_manager')" :visible.sync="visible" class="elx-imgbox-dialog" top="5vh">
       <el-tabs v-model="options.activeTab" tab-position="left">
-        <el-tab-pane label="选择图片" name="pick" class="pick-block">
+        <el-tab-pane :label="__('pick_image')" name="pick" class="pick-block">
           <div class="elx-img-list-loading" v-if="isLoading">
             <div class="el-icon-loading"></div>
           </div>
@@ -20,15 +20,15 @@
 
           <div class="elx-foot">
             <el-badge :value="images.length" class="item">
-              <el-button type="primary" size="medium" :disabled="images.length == 0" @click="onConfirm">确定</el-button>
+              <el-button type="primary" size="medium" :disabled="images.length == 0" @click="onConfirm">{{ __('confirm') }}</el-button>
             </el-badge>
-            <el-button type="primary" size="medium" @click="options.activeTab='upload'" plain v-if="options.enableUpload">上传图片</el-button>
+            <el-button type="primary" size="medium" @click="options.activeTab='upload'" plain v-if="options.enableUpload">{{ __('upload_image') }}</el-button>
           </div>
         </el-tab-pane>
 
-        <el-tab-pane label="上传图片" name="upload" class="upload-block" v-if="options.enableUpload">
+        <el-tab-pane :label="__('upload_image')" name="upload" class="upload-block" v-if="options.enableUpload">
           <div class="elx-main">
-            <div class="upload-title">请选择本地图片上传：</div>
+            <div class="upload-title">{{ __('pick_local_image_tip') }}：</div>
             <el-upload
               ref="upload"
               class="upload-img-preview"
@@ -55,7 +55,7 @@
             <div class="upload-tip">{{ uploadTips() }}</div>
 
             <div class="elx-foot">
-              <el-button type="primary" size="medium" @click="onUploadConfirm">确定上传</el-button>
+              <el-button type="primary" size="medium" @click="onUploadConfirm">{{ __('confirm_upload') }}</el-button>
             </div>
           </div>
         </el-tab-pane>
@@ -65,8 +65,24 @@
 </template>
 
 <script type="text/babel">
+let LANG = {
+  confirm: '确定',
+  confirm_upload: '确定上传',
+  image_manager: '图片管理器',
+  pick_image: '选择图片',
+  upload_image: '上传图片',
+  upload_num_limit: '当前最多只能选择 {0} 张图片',
+  server_no_response: '服务器打了个盹^_^',
+  upload_type_limit: '仅支持上传 jpg/png/gif 图片',
+  upload_size_limit: '大小不能超过',
+  selected_num: '已有选择 {0} 张图片。',
+  uploading_image_num: '即将上传 {0} 张图片。',
+  can_upload_num: '还可以选择 {0} 张图片上传',
+  pick_local_image_tip: '请选择本地图片上传'
+}
 export default {
-  name: 'ElxImgbox',
+  name: 'ElxImgManager',
+
   model: {
     prop: 'images',
     event: 'change'
@@ -75,11 +91,10 @@ export default {
   data () {
     return {
       images: [], // 已选图片
-
       options: {
         listUrl: '', // 图片列表数据URL
         action: '', // 图片上传URL
-        multiple: true, // 是否支持选取多个图片
+        multiple: false, // 是否支持选取多个图片
         withData: {}, // 上传时附带的额外参数
         withCredentials: true, // 支持发送 cookie 凭证信息
         headers: {}, // 设置上传的请求头部
@@ -148,7 +163,7 @@ export default {
 
       // 选择图片
       if (this.options.multiple && this.images.length >= this.options.limit) {
-        ELEMENT.Message.warning('最多只能选择' + this.options.limit + '张图片')
+        ELEMENT.Message.warning(this.__('upload_num_limit', [this.options.limit]))
         return
       }
 
@@ -298,11 +313,11 @@ export default {
     },
 
     uploadTypeTip () {
-      return '仅支持 jpg/png/gif 图片'
+      return this.__('upload_type_limit')
     },
 
     uploadSizeTip () {
-      return '大小不能超过 ' + this.options.maxSize + 'M'
+      return this.__('upload_size_limit') + ' ' + this.options.maxSize + 'M'
     },
 
     uploadTips () {
@@ -313,15 +328,15 @@ export default {
       }
 
       if (this.images.length > 0) {
-        tips.push('已有' + this.images.length + '张图片')
+        tips.push(this.__('selected_num', [this.images.length]))
       }
 
       const uploadFileNum = this.$refs.upload ? this.$refs.upload.uploadFiles.length : 0
       if (uploadFileNum > 0) {
-        tips.push('即将上传' + uploadFileNum + '张图片')
+        tips.push(this.__('uploading_image_num', [uploadFileNum]))
       }
 
-      tips.push('还可以选择' + (this.options.limit - this.images.length - uploadFileNum) + '张图片上传')
+      tips.push(this.__('can_upload_num', [(this.options.limit - this.images.length - uploadFileNum)]))
 
       return tips.join('，')
     },
@@ -333,7 +348,7 @@ export default {
      * @param fileList
      */
     onUploadError (err, file, fileList) {
-      ELEMENT.Message.info('服务器打了个盹^_^')
+      ELEMENT.Message.info(this.__('server_no_response'))
       // console.log(err)
       throw err
     },
@@ -365,16 +380,30 @@ export default {
      * 选择上传文件超过限制文件个数提示
      */
     onUploadExceedTip () {
-      ELEMENT.Message.warning('当前最多只能选择' + this.uploadNumberLimit() + '张图片上传')
+      ELEMENT.Message.warning(__('upload_num_limit', [this.uploadNumberLimit()]))
     },
 
     onRemove (imgIndex, img) {
       this.images.splice(imgIndex, 1)
       this.clearListSelected(img)
+    },
+
+    __(key, args) {
+      let lang = LANG[key] ? LANG[key] : key
+      if (args) {
+        for (let idx in args) {
+          lang = lang.replace('{' + idx + '}', args[idx])
+        }
+      }
+      return lang
     }
   },
 
   mounted () {
+    if (typeof ELX_IMGBOX_LANG !== 'undefined') {
+      Object.assign(LANG, ELX_IMGBOX_LANG)
+    }
+
     this.loadListImage()
   },
 

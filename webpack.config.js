@@ -4,9 +4,17 @@ const webpack = require('webpack')
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, './lib'),
-    // publicPath: '/dist/',
+    path: path.resolve(__dirname, './dist'),
+    publicPath: "/dist/",
     filename: 'index.js'
+  },
+  devServer: {
+    historyApiFallback: true,
+    noInfo: true,
+    overlay: true,
+    contentBase: [path.join(__dirname, 'example')],
+    port: 8081,
+    hot: true
   },
   module: {
     rules: [
@@ -67,11 +75,6 @@ module.exports = {
     },
     extensions: ['*', '.js', '.vue', '.json']
   },
-  devServer: {
-    historyApiFallback: true,
-    noInfo: true,
-    overlay: true
-  },
   performance: {
     hints: false
   },
@@ -80,6 +83,10 @@ module.exports = {
     vue: 'Vue',
     element: 'ELEMENT'
   },
+
+  plugins: [
+    new webpack.HotModuleReplacementPlugin()
+  ],
 
   devtool: '#eval-source-map'
 }

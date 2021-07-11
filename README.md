@@ -1,19 +1,28 @@
 # elx-imgbox
 
 > Image browse and upload plugin base on Vue & element-ui  
-> 基于Vue与element-ui的图片选取和上传组件
+> 基于 Vue 与 element-ui 的图片选取和上传组件
 > 支持组件和插件两种模式
 
-[Demo](http://imgbox.imcm.me/)
+[Example](./example)
+
+## 本地预览
+```shell
+git clone https://github.com/erzh/elx-imgbox.git
+cd elx-imgbox
+cnpm i
+npm run dev
+```
 
 ## require
  - Vue 2.5+
  - element-ui 2+
- - axios 0.19+
+ - axios 0.21+
 
 ## props
 
 ```
+{
   action: String, // 图片上传URL
   list-url: String, // 图片列表数据URL
   multiple: {type: Boolean, default: true},  // 是否支持选取多个图片
@@ -23,6 +32,7 @@
   with-data: {type: Object, default: null},  // 上传时附带的额外参数
   with-credentials: {type: Boolean, default: true}, // 支持发送 cookie 凭证信息
   headers: {type: Object, default: null}, // 设置上传的请求头部	Object
+}
 ```
 
 ## 数据绑定
@@ -62,5 +72,25 @@
   
   ],
   "total": "总图片数"
+}
+```
+
+## 本地化
+设置 js 变量 `ELX_IMGBOX_LANG`，覆盖如下元素，即可实现本地化。
+```js
+const ELX_IMGBOX_LANG = {
+  confirm: '确定',
+  conform_upload: '确定上传',
+  image_manager: '图片管理器',
+  pick_image: '选择图片',
+  upload_image: '上传图片',
+  upload_num_limit: '当前最多只能选择 {0} 张图片',
+  server_no_response: '服务器打了个盹^_^',
+  upload_type_limit: '仅支持上传 jpg/png/gif 图片',
+  upload_size_limit: '大小不能超过',
+  selected_num: '已有选择 {0} 张图片。',
+  uploading_image_num: '即将上传 {0} 张图片。',
+  can_upload_num: '还可以选择 {0} 张图片上传',
+  pick_local_image_tip: '请选择本地图片上传'
 }
 ```

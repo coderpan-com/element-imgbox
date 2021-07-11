@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>插件方式 - 上传单图</title>
+  <link rel="stylesheet" href="https://cdn.bootcss.com/element-ui/2.0.5/theme-chalk/index.css">
+  <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+
+<div class="container" id="app">
+
+  <h1>3. 插件方式 - 上传单图</h1>
+  <div class="plugin-images" @click="$elxImgbox(uploadOptions, uploadedImage ? [uploadedImage] : [])">
+    <ul class="el-upload-list el-upload-list--picture-card" v-if="uploadedImage && uploadedImage.url" v-cloak>
+      <li tabindex="0" class="el-upload-list__item is-success">
+        <img :src="uploadedImage.url" class="el-upload-list__item-thumbnail">
+      </li>
+    </ul>
+    <div tabindex="0" class="el-upload el-upload--picture-card" v-else>
+      <i class="el-icon-plus"></i>
+    </div>
+  </div>
+
+
+</div>
+
+<script src="https://cdn.staticfile.org/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.staticfile.org/element-ui/2.13.0/index.js"></script>
+<script src="https://cdn.staticfile.org/axios/0.19.0/axios.min.js"></script>
+<script src="../dist/index.js"></script>
+
+<script>
+  var vm = new Vue({
+    el: '#app',
+    data (){
+      return {
+        uploadedImage: null,
+        uploadOptions: {
+          action: 'mock/upload.json',
+          listUrl: 'mock/list.json',
+          multiple: false,
+          callback: (images) => {
+            this.uploadedImage = images.length > 0 ? images[0] : []
+          }
+        }
+      }
+    },
+    methods: {
+    }
+  });
+
+</script>
+</body>
+</html>
