@@ -1,3 +1,7 @@
+/*!
+ * elx-imgbox
+ * @see https://erzh.github.io/elx-imgbox/
+ */
 import ElxImgbox from './ElxImgbox'
 import ElxImgboxPlugin from './ElxImgboxPlugin'
 

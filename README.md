@@ -4,7 +4,7 @@
 > 基于 Vue 与 element-ui 的图片选取和上传组件
 > 支持组件和插件两种模式
 
-[Example](./example)
+[Example](https://erzh.github.io/elx-imgbox/example/)
 
 ## 本地预览
 ```shell
