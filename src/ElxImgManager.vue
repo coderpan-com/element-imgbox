@@ -7,7 +7,7 @@
             <div class="el-icon-loading"></div>
           </div>
 
-          <div class="no-image" v-if="!isLoading && images.length === 0">{{ __('no_image') }}</div>
+          <div class="no-image" v-if="!isLoading && result.total === 0">{{ __('no_image') }}</div>
 
           <div class="elx-main elx-img-list">
             <div class="img-item" v-for="(img, itemIndex) in result.items" @click="onClickListImage(img)" :key="itemIndex">
