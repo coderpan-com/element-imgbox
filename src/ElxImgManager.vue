@@ -7,8 +7,10 @@
             <div class="el-icon-loading"></div>
           </div>
 
+          <div class="no-image" v-if="!isLoading && images.length === 0">{{ __('no_image') }}</div>
+
           <div class="elx-main elx-img-list">
-            <div class="img-item" v-for="(img, itemIndex) in imgRes.items" @click="onClickListImage(img)" :key="itemIndex">
+            <div class="img-item" v-for="(img, itemIndex) in result.items" @click="onClickListImage(img)" :key="itemIndex">
               <div class="thumb-wp"><img :src="img.thumb" alt="img.name"></div>
               <div class="title">{{img.name}}</div>
               <div class="label" v-if="img.label">{{img.label}}</div>
@@ -16,7 +18,7 @@
             </div>
           </div>
 
-          <el-pagination layout="total, prev, pager, next" :total="imgRes.total" @current-change="onPageNumChange"></el-pagination>
+          <el-pagination layout="total, prev, pager, next" :total="result.total" @current-change="onPageNumChange"></el-pagination>
 
           <div class="elx-foot">
             <el-badge :value="images.length" class="item">
@@ -78,7 +80,8 @@ let LANG = {
   selected_num: '已有选择 {0} 张图片。',
   uploading_image_num: '即将上传 {0} 张图片。',
   can_upload_num: '还可以选择 {0} 张图片上传',
-  pick_local_image_tip: '请选择本地图片上传'
+  pick_local_image_tip: '请选择本地图片上传',
+  no_image: '暂无图片'
 }
 export default {
   name: 'ElxImgManager',
@@ -109,7 +112,7 @@ export default {
       visible: false,
       uploadSuccessCount: 0,
 
-      imgRes: {
+      result: {
         items: [],
         total: 0
       }
@@ -172,23 +175,23 @@ export default {
     },
 
     clearListSelected (img) {
-      for (let i = 0; i < this.imgRes.items.length; i++) {
+      for (let i = 0; i < this.result.items.length; i++) {
         if (img) {
-          if (img.url === this.imgRes.items[i].url) {
-            this.imgRes.items[i].selected = false
+          if (img.url === this.result.items[i].url) {
+            this.result.items[i].selected = false
             break
           }
-        } else if (this.imgRes.items[i].selected) {
-          this.imgRes.items[i].selected = false
+        } else if (this.result.items[i].selected) {
+          this.result.items[i].selected = false
         }
       }
     },
 
     /**
      * 加载图片列表数据
-     * @param page
+     * @param {int} page
      */
-    loadListImage (page = 1) {
+    loadList (page = 1) {
       if (!this.options.listUrl) {
         throw new Error('listUrl is required')
       }
@@ -203,7 +206,7 @@ export default {
        */
       axios.get(this.options.listUrl, { params: { page: page, ps: 15, _r: Math.random() } }).then(response => {
         const result = response.data
-        this.imgRes.total = parseInt(result.total)
+        this.result.total = parseInt(result.total)
 
         let imageList = []
         let listCount = 0
@@ -238,7 +241,7 @@ export default {
           imageList.push(img)
         }
 
-        this.imgRes.items = imageList
+        this.result.items = imageList
         this.isLoading = false
       })
     },
@@ -248,7 +251,7 @@ export default {
      */
     selectedImageIndex (img) {
       for (let i = 0; i < this.images.length; i++) {
-        var selectedImg = this.images[i]
+        const selectedImg = this.images[i];
 
         if (selectedImg.url === img.url) {
           return i
@@ -263,7 +266,7 @@ export default {
      * @param page
      */
     onPageNumChange (page) {
-      this.loadListImage(page)
+      this.loadList(page)
     },
 
     /**
@@ -274,10 +277,11 @@ export default {
     },
 
     onUploadProgress (event, file, fileList) {
-
+      // console.log('onUploadProgress', event, file, fileList)
     },
 
     onUploadChange (file, fileList) {
+      // console.log('onUploadChange', file, fileList)
     },
 
     /**
@@ -343,13 +347,23 @@ export default {
 
     /**
      * 上传错误处理
-     * @param err
+     * @param {Error} err
      * @param file
      * @param fileList
      */
     onUploadError (err, file, fileList) {
-      ELEMENT.Message.info(this.__('server_no_response'))
-      // console.log(err)
+      if (err.message) {
+        try {
+          var data = JSON.parse(err.message)
+          if (data && data.message) {
+            ELEMENT.Message.error(data.message)
+            return
+          }
+        } catch(e) {}
+      }
+
+      ELEMENT.Message.error(this.__('server_no_response'))
+      // console.log('onUploadError', err)
       throw err
     },
 
@@ -361,6 +375,12 @@ export default {
      * @returns {boolean}
      */
     onUploadSuccess (response, file, fileList) {
+      if (! response.success) {
+        const message = response.message || '上传失败'
+        ELEMENT.Message.error(message)
+        return false
+      }
+
       if (!this.options.multiple) {
         this.images = []
       }
@@ -388,14 +408,21 @@ export default {
       this.clearListSelected(img)
     },
 
+    /**
+     * 获取本地化语言
+     * @returns string
+     * @private
+     * @param {string} key
+     * @param {array} args
+     */
     __(key, args) {
-      let lang = LANG[key] ? LANG[key] : key
+      let value = LANG[key] ? LANG[key] : key
       if (args) {
         for (let idx in args) {
-          lang = lang.replace('{' + idx + '}', args[idx])
+          value = value.replace('{' + idx + '}', args[idx])
         }
       }
-      return lang
+      return value
     }
   },
 
@@ -404,7 +431,7 @@ export default {
       Object.assign(LANG, ELX_IMGBOX_LANG)
     }
 
-    this.loadListImage()
+    this.loadList()
   },
 
   computed: {
@@ -421,6 +448,12 @@ export default {
       line-height: 82px;
       border-radius: 5px;
     }
+  }
+
+  .no-image {
+    line-height: 120px;
+    text-align: center;
+    color: #999;
   }
 
   .elx-imgbox-dialog {
