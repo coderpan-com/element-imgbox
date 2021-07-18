@@ -53,8 +53,11 @@
     },
 
     watch: {
-      theImages: function () {
+      theImages() {
         this.$emit('change', this.theImages)
+      },
+      images() {
+        this.theImages = this.images
       }
     },
 
