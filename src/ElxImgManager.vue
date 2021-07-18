@@ -400,7 +400,7 @@ export default {
      * 选择上传文件超过限制文件个数提示
      */
     onUploadExceedTip () {
-      ELEMENT.Message.warning(__('upload_num_limit', [this.uploadNumberLimit()]))
+      ELEMENT.Message.warning(this.__('upload_num_limit', [this.uploadNumberLimit()]))
     },
 
     onRemove (imgIndex, img) {
