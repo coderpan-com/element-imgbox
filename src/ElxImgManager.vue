@@ -75,7 +75,7 @@ let LANG = {
   upload_image: '上传图片',
   upload_num_limit: '当前最多只能选择 {0} 张图片',
   server_no_response: '服务器打了个盹^_^',
-  upload_type_limit: '仅支持上传 jpg/png/gif 图片',
+  upload_type_limit: '仅支持上传 「{0}」 图片',
   upload_size_limit: '大小不能超过',
   selected_num: '已有选择 {0} 张图片。',
   uploading_image_num: '即将上传 {0} 张图片。',
@@ -83,6 +83,7 @@ let LANG = {
   pick_local_image_tip: '请选择本地图片上传',
   no_image: '暂无图片'
 }
+
 export default {
   name: 'ElxImgManager',
 
@@ -105,7 +106,8 @@ export default {
         maxSize: 2, // 最大尺寸（M）
         activeTab: 'pick',
         enableUpload: true, // 是否启用图片上传
-        callback: null
+        callback: null,
+        allowTypes: ['jpeg', 'png', 'gif', 'webp'],
       },
 
       isLoading: true,
@@ -289,13 +291,11 @@ export default {
      * @param file
      * @returns {boolean}
      */
-    beforeUpload (file) {
-      const isJPG = file.type === 'image/jpeg'
-      const isPNG = file.type === 'image/png'
-      const isGif = file.type === 'image/gif'
+    beforeUpload (file) {console.log(file.type)
       const isSize = file.size / (1024 * 1024) < this.options.maxSize
 
-      if (!isJPG && !isPNG && !isGif) {
+      const type = file.type.split('/')[1]
+      if (this.options.allowTypes.indexOf(type) < 0) {
         ELEMENT.Message.error(this.uploadTypeTip())
         return false
       }
@@ -317,7 +317,23 @@ export default {
     },
 
     uploadTypeTip () {
-      return this.__('upload_type_limit')
+      const typeExts = {
+        "jpeg": "jpg/jpeg",
+        "png": "png",
+        "gif": "gif",
+        "bmp": "bmp",
+        "webp": "webp",
+        "x-icon": "icon",
+        "svg+xml": "svg"
+      }
+      let allowExts = []
+      for (let allowType of this.options.allowTypes) {
+        if (!typeExts[allowType]) {
+          continue
+        }
+        allowExts.push(typeExts[allowType])
+      }
+      return this.__('upload_type_limit', [allowExts.join('/')])
     },
 
     uploadSizeTip () {

@@ -3,11 +3,13 @@
     <div class="elx-images">
       <ul class="el-upload-list el-upload-list--picture-card">
         <li :tabindex="imgIndex" class="el-upload-list__item" v-for="(img, imgIndex) in theImages" :key="imgIndex">
-          <img :src="img.thumb" alt="" class="el-upload-list__item-thumbnail">
-          <span class="el-upload-list__item-actions">
-            <a class="el-upload-list__item-preview" :href="img.url" target="_blank"><i class="el-icon-zoom-in"></i></a>
-            <span class="el-upload-list__item-delete" @click="onRemove(imgIndex, img)"><i class="el-icon-delete"></i></span>
-          </span>
+          <el-image :src="img.thumb" :preview-src-list="imageUrls()" alt="" class="el-upload-list__item-thumbnail"></el-image>
+          <el-popconfirm
+            title="确定删除吗？"
+            @confirm="onRemove(imgIndex, img)"
+          >
+            <i class="el-icon-close" slot="reference"></i>
+          </el-popconfirm>
         </li>
       </ul>
       <div tabindex="0" class="el-upload el-upload--picture-card" v-if="(multiple && theImages.length < limit) || (!multiple && theImages.length == 0)" @click="onUpload">
@@ -36,7 +38,8 @@
       withCredentials: { type: Boolean, default: true }, // 支持发送 cookie 凭证信息
       headers: { type: Object, default: () => {} }, // 设置上传的请求头部
       images: { type: Array, default: () => [] }, // 已选图片
-      activeTab: { type: String, default: 'pick' }
+      activeTab: { type: String, default: 'pick' },
+      allowTypes: { type: Array, default: () => ['jpeg', 'png', 'gif', 'webp']}
     },
 
     data () {
@@ -74,6 +77,7 @@
           withCredentials: this.withCredentials, // 支持发送 cookie 凭证信息
           headers: this.headers, // 设置上传的请求头部
           activeTab: this.activeTab,
+          allowTypes: this.allowTypes,
           callback: (images) => {
             this.theImages = images
           }
@@ -82,6 +86,14 @@
 
       onRemove (imgIndex, img) {
         this.theImages.splice(imgIndex, 1)
+      },
+
+      imageUrls() {
+        let urls = []
+        for (let item of this.theImages) {
+          urls.push(item.url)
+        }
+        return urls
       }
     },
 
@@ -97,11 +109,30 @@
 <style lang="scss">
   .elx-images {
     line-height: 0;
-    .el-upload-list__item, .el-upload--picture-card {
+    .el-upload-list__item, .el-upload {
       width: 78px;
       height: 78px;
       line-height: 82px;
       border-radius: 5px;
+    }
+
+    .el-upload-list--picture-card .el-upload-list__item {
+      overflow: visible;
+      $thumb-size: 16px;
+      .el-icon-close {
+        position: absolute;
+        right: -6px;
+        top: -6px;
+        width: $thumb-size;
+        height: $thumb-size;
+        background: rgba(0, 0, 0, .6);
+        border-radius: 50%;
+        display: block !important;
+        font-size: 12px;
+        line-height: $thumb-size;
+        text-align: center;
+        color: #fff;
+      }
     }
 
     .el-upload-list__item-actions {

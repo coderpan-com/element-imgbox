@@ -1,7 +1,7 @@
 {
   "name": "elx-imgbox",
   "description": "Image browse and upload plugin base on Vue & element-ui",
-  "version": "0.4.3",
+  "version": "0.6.0",
   "author": "erzh <cmpan@qq.com>",
   "license": "MIT",
   "scripts": {
