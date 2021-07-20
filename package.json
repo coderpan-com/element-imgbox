@@ -1,6 +1,6 @@
 {
-  "name": "elx-imgbox",
-  "description": "Image browse and upload plugin base on Vue & element-ui",
+  "name": "element-imgbox",
+  "description": "Image browse and upload plugin base on Vue 2 & element-ui 2",
   "version": "0.6.0",
   "author": "erzh <cmpan@qq.com>",
   "license": "MIT",
@@ -32,6 +32,6 @@
     "vue-loader": "^13.0.5",
     "vue-template-compiler": "^2.4.4",
     "webpack": "^3.6.0",
-    "webpack-dev-server": "^2.11.5"
+    "webpack-dev-server": "^3.1.11"
   }
 }
