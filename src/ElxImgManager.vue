@@ -2,7 +2,7 @@
   <div class="elx-imgbox">
     <el-dialog :title="__('image_manager')" :visible.sync="visible" class="elx-imgbox-dialog" top="5vh">
       <el-tabs v-model="options.activeTab" tab-position="left">
-        <el-tab-pane :label="__('pick_image')" name="pick" class="pick-block">
+        <el-tab-pane :label="__('pick_image')" name="pick" class="pick-tab">
           <div class="elx-img-list-loading" v-if="isLoading">
             <div class="el-icon-loading"></div>
           </div>
@@ -21,14 +21,14 @@
           <el-pagination layout="total, prev, pager, next" :total="result.total" @current-change="onPageNumChange"></el-pagination>
 
           <div class="elx-foot">
+            <el-button size="medium" @click="options.activeTab='upload'" plain v-if="options.enableUpload">{{ __('upload_image') }}</el-button>
             <el-badge :value="images.length" class="item">
-              <el-button type="primary" size="medium" :disabled="images.length == 0" @click="onConfirm">{{ __('confirm') }}</el-button>
+              <el-button type="primary" size="medium" :disabled="images.length === 0" @click="onConfirm">{{ __('confirm') }}</el-button>
             </el-badge>
-            <el-button type="primary" size="medium" @click="options.activeTab='upload'" plain v-if="options.enableUpload">{{ __('upload_image') }}</el-button>
           </div>
         </el-tab-pane>
 
-        <el-tab-pane :label="__('upload_image')" name="upload" class="upload-block" v-if="options.enableUpload">
+        <el-tab-pane :label="__('upload_image')" name="upload" class="upload-tab" v-if="options.enableUpload">
           <div class="elx-main">
             <div class="upload-title">{{ __('pick_local_image_tip') }}：</div>
             <el-upload
@@ -48,17 +48,15 @@
               :on-progress="onUploadProgress"
               :on-success="onUploadSuccess"
               :on-error="onUploadError"
-              :on-exceed="onUploadExceedTip">
-
+              :on-exceed="onUploadExceedTip"
+            >
               <i class="el-icon-plus"></i>
-
             </el-upload>
-
             <div class="upload-tip">{{ uploadTips() }}</div>
-
-            <div class="elx-foot">
-              <el-button type="primary" size="medium" @click="onUploadConfirm">{{ __('confirm_upload') }}</el-button>
-            </div>
+          </div>
+          <div class="elx-foot">
+            <el-button size="medium" @click="options.activeTab='pick'" plain>{{ __('pick_image') }}</el-button>
+            <el-button type="primary" size="medium" @click="onUploadConfirm">{{ __('confirm_upload') }}</el-button>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -68,7 +66,7 @@
 
 <script type="text/babel">
 let LANG = {
-  confirm: '确定',
+  confirm: '确 定',
   confirm_upload: '确定上传',
   image_manager: '图片管理器',
   pick_image: '选择图片',
@@ -79,7 +77,7 @@ let LANG = {
   upload_size_limit: '大小不能超过',
   selected_num: '已有选择 {0} 张图片。',
   uploading_image_num: '即将上传 {0} 张图片。',
-  can_upload_num: '还可以选择 {0} 张图片上传',
+  can_upload_num: '还可以选择 {0} 张图片上传。',
   pick_local_image_tip: '请选择本地图片上传',
   no_image: '暂无图片'
 }
@@ -344,7 +342,7 @@ export default {
       let tips = [this.uploadTypeTip(), this.uploadSizeTip()]
 
       if (!this.options.multiple) {
-        return tips.join('，')
+        return tips.join('')
       }
 
       if (this.images.length > 0) {
@@ -494,6 +492,7 @@ export default {
 
     .el-tabs {
       .el-tabs__header {
+        width: 100px;
         margin-right: 0;
         margin-top: 5px;
         .el-tabs__nav-wrap::after {
@@ -508,19 +507,20 @@ export default {
       }
 
       .el-tabs__content {
-        height: 560px;
+        height: 494px;
         background: #fff;
       }
     }
 
     .elx-foot {
-      padding: 15px 0 0 10px;
+      padding: 20px 20px 0 20px;
+      text-align: right;
       .el-button {
         margin:0 0 0 10px;
       }
     }
 
-    .pick-block {
+    .pick-tab {
       position: relative;
 
       .elx-img-list-loading {
@@ -529,7 +529,7 @@ export default {
         left: 0;
         right: 0;
         width: 100%;
-        height: 450px;
+        height: 360px;
         background: #fff;
         text-align: center;
 
@@ -542,7 +542,7 @@ export default {
 
       .elx-img-list {
         padding:10px;
-        height:433px;
+        height:360px;
 
         .img-item {
           $imgSize: 100px;
@@ -566,6 +566,7 @@ export default {
             overflow: hidden;
             background: $bg;
             padding: 0 5px;
+            display: none;
           }
 
           .label {
@@ -631,7 +632,7 @@ export default {
         background: #f9f9f9;
         position: relative;
         padding: 5px;
-        margin: 0 24px 0 20px;
+        margin: 0 20px 0 20px;
         text-align: right;
         float: none;
 
@@ -641,9 +642,13 @@ export default {
       }
     }
 
-    .upload-block {
+    .upload-tab {
+      .elx-main {
+        height: 418px;
+        overflow-y: auto;
+      }
       .upload-img-preview {
-        padding:20px;
+        padding:20px 0 20px 20px;
 
         /* 上传图片预览改为使用背景图片按比例缩放方式 */
         .el-upload--picture-card, .el-upload-list--picture-card .el-upload-list__item, .el-upload-list--picture-card .el-upload-list__item .wp {

@@ -12,7 +12,7 @@
           </el-popconfirm>
         </li>
       </ul>
-      <div tabindex="0" class="el-upload el-upload--picture-card" v-if="(multiple && theImages.length < limit) || (!multiple && theImages.length == 0)" @click="onUpload">
+      <div tabindex="0" class="el-upload el-upload--picture-card" v-if="(multiple && theImages.length < limit) || (!multiple && theImages.length === 0)" @click="onUpload">
         <i class="el-icon-plus"></i>
       </div>
     </div>
@@ -30,8 +30,8 @@
     props: {
       action: String, // 图片上传URL
       listUrl: String, // 图片列表数据URL
-      multiple: { type: Boolean, default: false }, // 是否支持选取多个图片
       enableUpload: { type: Boolean, default: true }, // 是否启用图片上传
+      multiple: { type: Boolean, default: false }, // 是否支持选取多个图片
       limit: { type: Number, default: 10 }, // 最多可选择图片数量
       maxSize: { type: Number, default: 2 }, // 最大尺寸（M）
       withData: { type: Object, default: () => {} }, // 上传时附带的额外参数
