@@ -4,11 +4,11 @@
 > 基于 Vue 与 element-ui 的图片选取和上传组件
 > 支持组件和插件两种模式
 
-# [Example](https://erzh.github.io/element-imgbox/example/)
-- [组件方式 上传单图](https://erzh.github.io/element-imgbox/example/1.component-single.html)
-- [组件方式 上传多图](https://erzh.github.io/element-imgbox/example/2.component-multiple.html)
-- [插件方式 上传单图](https://erzh.github.io/element-imgbox/example/3.plugin-single.html)
-- [插件方式 上传多图](https://erzh.github.io/element-imgbox/example/4.plugin-multiple.html)
+# [Example](https://yibafun.github.io/element-imgbox/example/)
+- [组件方式 上传单图](https://yibafun.github.io/element-imgbox/example/1.component-single.html)
+- [组件方式 上传多图](https://yibafun.github.io/element-imgbox/example/2.component-multiple.html)
+- [插件方式 上传单图](https://yibafun.github.io/element-imgbox/example/3.plugin-single.html)
+- [插件方式 上传多图](https://yibafun.github.io/element-imgbox/example/4.plugin-multiple.html)
 
 ## 本地预览
 ```shell
